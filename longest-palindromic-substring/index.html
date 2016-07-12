@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div>
+    <input id="str" type="text">
+    <button id="submit">submit</button>
+    <button id="next" disabled>next</button>
+    <button id="back" disabled>back</button>
+</div>
+
+
+<canvas id="myCanvas" width="1800" height="300">
+    Your browser does not support the HTML5 canvas tag.
+</canvas>
+
+<script>
+    var c=document.getElementById("myCanvas");
+    var ctx=c.getContext("2d");
+    var string;
+    var states = [];
+    var state_index = 0;
+
+    function initStr(ctx,s) {
+
+        var ss="^#";
+        for(var i=0;i<s.length;i++){
+            ss+=s[i]+"#";
+        }
+        ss+="$";
+        ctx.fillStyle="black";
+        for(var i=0;i<ss.length;i++){
+            ctx.strokeRect(i*30+50,50,30,30);
+            ctx.font="20px Georgia";
+            ctx.fillText(ss[i],i*30+60,70);
+        }
+        return ss;
+    }
+    function valid(s) {
+        if(s.length==0){
+            alert("empty string");
+            return false;
+        }
+        if(s.length>20){
+            alert("too long");
+            return false;
+        }
+        if(!/^[a-z]+$/.test(s)){
+            alert("only lowercase");
+            return false;
+        }
+        return true;
+    }
+
+    function draw_line(start,end,color,level) {
+        ctx.fillStyle=color;
+        ctx.fillRect(start*30+50,90+level*10,(end-start+1)*30,5);
+    }
+
+    function draw_cycle(index,color,level) {
+        ctx.beginPath();
+        ctx.fillStyle=color;
+        ctx.arc(index*30+65,92+level*10,5,0,2*Math.PI);
+        ctx.closePath();
+        ctx.fill();
+    }
+
+    function draw(ctx,s,state) {
+        ctx.clearRect(0,0,1800,300);
+        initStr(ctx,s);
+        draw_cycle(state.index,"blue",0);
+        if(state.ext_start<=state.ext_end)draw_line(state.ext_start,state.ext_end,"blue",0);
+        draw_cycle(state.long_index,"green",1);
+        if(state.long_ext_start<=state.long_ext_end)draw_line(state.long_ext_start,state.long_ext_end,"green",1);
+        draw_cycle(state.max_index,"red",2);
+        if(state.max_ext_start<=state.max_ext_end)draw_line(state.max_ext_start,state.max_ext_end,"red",2);
+    }
+
+    function copy( obj ){
+        return JSON.parse( JSON.stringify( obj ) );
+    }
+
+    function algorithm(states) {
+        var ss="^#";
+        for(var i=0;i<string.length;i++){
+            ss+=string[i]+"#";
+        }
+        ss+="$";
+        var ext = [];
+        for(var i=0;i<ss.length;i++)ext.push(0);
+        var mid,max_mid;
+        mid=max_mid=0;
+        ext[0]=0;
+        var state = {};
+        for(i=2;i<ss.length;i++){
+            state.index = i;
+            state.ext_start=0;
+            state.ext_end=-1;
+            states.push(copy(state));
+            if(ext[mid]+mid>i){
+                ext[i]=Math.min(ext[mid]+mid-i,ext[mid*2-i]);
+            }
+            else ext[i]=1;
+            state.ext_start=i-ext[i]+1;
+            state.ext_end=i+ext[i]-1;
+            states.push(copy(state));
+
+            while(ss[i-ext[i]]==ss[i+ext[i]]){
+                ext[i]++;
+                state.ext_start=i-ext[i]+1;
+                state.ext_end=i+ext[i]-1;
+                states.push(copy(state));
+            }
+            if(ext[i]+i>ext[mid]+mid){
+                mid=i;
+                state.long_index=i;
+                state.long_ext_start=i-ext[i]+1;
+                state.long_ext_end=i+ext[i]-1;
+                states.push(copy(state));
+            }
+            if(ext[i]>ext[max_mid]){
+                max_mid=i;
+                state.max_index=i;
+                state.max_ext_start=i-ext[i]+1;
+                state.max_ext_end=i+ext[i]-1;
+                states.push(copy(state));
+            }
+        }
+    }
+
+    document.getElementById('submit').addEventListener('click', function(event) {
+        var s = document.getElementById("str").value;
+        document.getElementById("next").disabled=true;
+        document.getElementById("back").disabled=true;
+        string = s;
+        if(!valid(s)){
+            ctx.clearRect(0,0,1800,300);
+            return;
+        }
+        states = [];
+        algorithm(states);
+        document.getElementById("next").disabled=false;
+        state_index=0;
+        draw(ctx,string,states[state_index]);
+    }, false);
+
+    document.getElementById('next').addEventListener('click', function(event) {
+        state_index+=1;
+        if(state_index<states.length){
+            draw(ctx,string,states[state_index]);
+            document.getElementById("back").disabled=false;
+        }
+        if(state_index==states.length-1){
+            document.getElementById("next").disabled=true;
+        }
+    }, false);
+
+    document.getElementById('back').addEventListener('click', function(event) {
+        state_index-=1;
+        if(state_index>=0){
+            draw(ctx,string,states[state_index]);
+            document.getElementById("next").disabled=false;
+        }
+        if(state_index==0){
+            document.getElementById("back").disabled=true;
+        }
+    }, false);
+
+
+//    for(var i=0;i<10;i++){
+//        ctx.strokeRect(i*30+50,50,30,30);
+//        ctx.font="20px Georgia";
+//        ctx.fillText(i,i*30+60,70);
+//    }
+//    for(var i=0;i<10;i++){
+//        ctx.fillStyle="#0000ff";
+//        ctx.fillRect(i*30+50,90,30,5);
+//    }
+//    for(var i=0;i<4;i++){
+//        ctx.fillStyle="green";
+//        ctx.fillRect(i*30+50,100,30,5);
+//    }
+//    for(var i=0;i<4;i++){
+//        ctx.beginPath();
+//        ctx.fillStyle="red";
+//        ctx.arc(i*30+65,40,5,0,2*Math.PI);
+//        ctx.closePath();
+//        ctx.fill();
+//    }
+</script>
+
+</body>
+</html>
