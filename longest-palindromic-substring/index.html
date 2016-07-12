@@ -9,6 +9,8 @@
     <input id="str" type="text">
     <button id="submit">submit</button>
     <button id="next" disabled>next</button>
+    <button id="display" disabled>display</button>
+    <button id="stop" disabled>stop</button>
     <button id="back" disabled>back</button>
 </div>
 
@@ -23,6 +25,7 @@
     var string;
     var states = [];
     var state_index = 0;
+	var intervalevent=-1;
 
     function initStr(ctx,s) {
 
@@ -143,11 +146,32 @@
         states = [];
         algorithm(states);
         document.getElementById("next").disabled=false;
+        document.getElementById("display").disabled=false;
         state_index=0;
         draw(ctx,string,states[state_index]);
     }, false);
-
-    document.getElementById('next').addEventListener('click', function(event) {
+	
+	function beginInterval()
+	{
+		if(intervalevent != -1)
+		{
+			clearInterval(intervalevent);
+		}
+		donext();
+		intervalevent=setInterval(donext,700);
+	}
+	
+	function stopInterval()
+	{
+		if(intervalevent != -1)
+		{
+			clearInterval(intervalevent);
+		}
+		intervalevent = -1 ;		
+	}
+	
+	function donext()
+	{		
         state_index+=1;
         if(state_index<states.length){
             draw(ctx,string,states[state_index]);
@@ -155,7 +179,14 @@
         }
         if(state_index==states.length-1){
             document.getElementById("next").disabled=true;
+            document.getElementById("display").disabled=true;			
+            document.getElementById("stop").disabled=true;
+			stopInterval();			
         }
+	}
+
+    document.getElementById('next').addEventListener('click', function(event) {
+		donext();
     }, false);
 
     document.getElementById('back').addEventListener('click', function(event) {
@@ -163,10 +194,25 @@
         if(state_index>=0){
             draw(ctx,string,states[state_index]);
             document.getElementById("next").disabled=false;
+            document.getElementById("display").disabled=false;			
+            document.getElementById("stop").disabled=false;
         }
         if(state_index==0){
             document.getElementById("back").disabled=true;
         }
+    }, false);
+		
+	document.getElementById('display').addEventListener('click', function(event) {
+        stopInterval();
+		beginInterval();		
+        document.getElementById("display").disabled=true;		
+        document.getElementById("stop").disabled=false;
+    }, false);
+	
+	document.getElementById('stop').addEventListener('click', function(event) {
+        stopInterval();
+        document.getElementById("display").disabled=false;		
+        document.getElementById("stop").disabled=true;
     }, false);
 
 
