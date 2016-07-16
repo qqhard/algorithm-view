@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="/bower_components/jointjs/dist/joint.css" />
+    <script src="/bower_components/jquery/jquery.js"></script>
+    <script src="/bower_components/lodash/lodash.js"></script>
+    <script src="/bower_components/backbone/backbone.js"></script>
+    <script src="/bower_components/jointjs/dist/joint.js"></script>
+</head>
+<body>
+<g id="myholder" class="label"></g>
+<script type="text/javascript">
+
+    var graph = new joint.dia.Graph;
+
+    var paper = new joint.dia.Paper({
+        el: document.getElementById("myholder"),
+        width: 1500,
+        height: 1000,
+        model: graph,
+        interactive: false,
+        gridSize: 1
+    });
+
+    var rect = new joint.shapes.basic.Rect({
+        position: { x: 100, y: 30 },
+        size: { width: 100, height: 30 },
+        attrs: { rect: { fill: 'blue' }, text: { text: 'my box', fill: 'white' } }
+    });
+
+    var rect2 = rect.clone();
+    rect2.translate(300);
+
+    var link = new joint.dia.Link({
+        source: { id: rect.id },
+        target: { id: rect2.id }
+    });
+    link.transition('target', { x: 250, y: 250 }, {
+        delay: 100,
+        duration: 10000,
+        timingFunction: joint.util.timing.bounce,
+        valueFunction: joint.util.interpolate.object
+    });
+
+//    setTimeout(function () {
+        rect.transition('position/x', 250);
+//    },2000);
+
+    graph.addCells([rect, rect2, link]);
+
+</script>
+</body>
+</html>
+        

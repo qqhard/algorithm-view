@@ -15,6 +15,10 @@
     "tests"
   ],
   "dependencies": {
-    "d3": "^4.1.1"
+    "d3": "^4.1.1",
+    "jointjs": "^0.9.10",
+    "jquery": "2.0.3",
+    "lodash": "3.10.1",
+    "backbone": "1.2.1"
   }
 }
