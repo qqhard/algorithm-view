@@ -6,40 +6,67 @@
     <script src="/bower_components/lodash/lodash.js"></script>
     <script src="/bower_components/backbone/backbone.js"></script>
     <script src="/bower_components/jointjs/dist/joint.js"></script>
-    <script src="/red-black-tree/rbt.js"></script>
+    <script src="/red-black-tree/rbtoperation.js"></script>
 </head>
 <body>
-<g id="myholder" class="label"></g>
+<div style="display: inline-block; padding-right:10px;margin-right: 10px;border-right:dotted;border-right-color: #27ae60;border-right-width: 3px;">
+    <input id="tval" type="text" style="display: inline-block"/>
+    <button id="tbtn" style="display: inline-block;">添加</button>
+</div>
+<div style="display: inline-block; padding-right:10px;margin-right: 10px;border-right:dotted;border-right-color: #27ae60;border-right-width: 3px;">
+    <input id="tcol" type="text" style="display: inline-block"/>
+    <button id="trbtn" style="display: inline-block;">变红</button>
+    <button id="tbbtn" style="display: inline-block;">变黑</button>
+</div>
+<div style="display: inline-block; padding-right:10px;margin-right: 10px;border-right:dotted;border-right-color: #27ae60;border-right-width: 3px;">
+    <input id="tdel" type="text" style="display: inline-block"/>
+    <button id="tdelbtn" style="display: inline-block;">删除</button>
+</div>
+<div style="display: inline-block; padding-right:10px;margin-right: 10px;border-right:dotted;border-right-color: #27ae60;border-right-width: 3px;">
+    <input id="tcovs" type="text" style="display: inline-block"/>
+    <input id="tcovt" type="text" style="display: inline-block"/>
+    <button id="tcovbtn" style="display: inline-block;">覆盖</button>
+</div>
+<div id="myholder" style="width:1210px; height:610px; border:dashed; border-color: #2c3e50;border-width: 2px;border-radius: 5px;" class="label"></div>
 <script type="text/javascript">
-
+    var pwidth=$("#myholder").width();
+    var pheight=$("#myholder").height();
     var graph = new joint.dia.Graph;
     var paper = new joint.dia.Paper({
         el: document.getElementById("myholder"),
-        width: 600,
-        height: 600,
+        width: pwidth,
+        height: pheight,
         model: graph,
         interactive: false,
         gridSize: 1
     });
+    var brt=RBT.createNew(graph,pwidth,pheight);
+    var initarr=[16,8,4,2,6,12,10,14,24,20,18,22,28,26,30];
+    for(var i in initarr){
+        brt.addNode(initarr[i]);
+    }
 
-    var circle1=new joint.shapes.basic.Circle({
-        position:{x:100,y:100},
-        size:{width:60,height:60},
-        attrs:{circle:{fill:'#ffff00'},text:{text:'ball1'}}
-    });
-    var circle2=new joint.shapes.basic.Circle({
-        position:{x:300,y:100},
-        size:{width:60,height:60},
-        attrs:{circle:{fill:'#ff00ff'},text:{text:'ball2',fill:'#ffffff'}}
-    });
-
-    var link=new joint.dia.MyLink({
-        source:{id:circle1.id},
-        target:{id:circle2.id}
-    });
-    graph.addCells([circle1,circle2,link]);
-    $(".link-tools").remove();
-
+    document.getElementById('tbtn').onclick=function(){
+        var tval=parseInt(document.getElementById('tval').value);
+        brt.addNode(tval);
+    }
+    document.getElementById('trbtn').onclick=function(){
+        var tval=parseInt(document.getElementById('tcol').value);
+        brt.changeToRed(tval);
+    };
+    document.getElementById('tbbtn').onclick=function(){
+        var tval=parseInt(document.getElementById('tcol').value);
+        brt.changeToBlack(tval);
+    };
+    document.getElementById('tcovbtn').onclick=function(){
+        var tcovs=parseInt(document.getElementById('tcovs').value);
+        var tcovt=parseInt(document.getElementById('tcovt').value);
+        brt.cover(tcovs,tcovt);
+    }
+    document.getElementById('tdelbtn').onclick=function(){
+        var tdel=parseInt(document.getElementById('tdel').value);
+        brt.delnode(tdel);
+    }
 </script>
 </body>
 </html>

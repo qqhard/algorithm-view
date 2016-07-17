@@ -244,6 +244,168 @@ joint.dia.MyLink = joint.dia.Cell.extend({
         }
     });
 
+var Node={
+    red_color:'#CD0000',
+    black_color:'#000000',
+    vertical_distance:70,
+    circle_radius:15,
+    createNew:function(x,y,value){
+        var rbtNode={};
+        rbtNode.lchild=null;
+        rbtNode.rchild=null;
+        rbtNode.father=null;
+        rbtNode.link_father=null;
+        rbtNode.deep=null;
+        rbtNode.value=value;
+        rbtNode.rbtnode=new joint.shapes.basic.Circle({
+            position:{x:x,y:y},
+            size:{width:Node.circle_radius*2,height:Node.circle_radius*2},
+            attrs:{circle:{fill:Node.red_color},text:{text:""+value,fill:'#ffffff'}}
+        });
+        rbtNode.changeToRed=function(){
+            rbtNode.rbtnode.attr({
+                circle:{fill:Node.red_color}
+            });
+        };
+        rbtNode.changeToBlack=function(){
+            rbtNode.rbtnode.attr({
+                circle:{fill:Node.black_color}
+            });
+        };
+        return rbtNode;
+    }
+}
+
+
+var RBT = {
+    createNew:function(graph,paperWidth,paperHeight){
+        rbtree={};
+        rbtree.graph=graph;
+        rbtree.head=null;
+        rbtree.width=parseInt(paperWidth);
+        rbtree.height=parseInt(paperHeight);
+        rbtree.addNode=function(val){
+            var tmpnode;
+            if(rbtree.head ==  null){       // 当前为空树
+                tmpnode=Node.createNew(rbtree.width/2-Node.circle_radius,30,val);
+                tmpnode.value=val;
+                tmpnode.deep=2;
+                rbtree.head=tmpnode;
+                graph.addCell(tmpnode.rbtnode);
+            }
+            else{                         // 当前部位空树
+                var tmpp=rbtree.head;
+                var lastnode=null;
+                while(tmpp!=null){
+                    lastnode=tmpp;
+                    if(val>=tmpp.value)tmpp=tmpp.rchild;
+                    else tmpp=tmpp.lchild;
+                }
+                var tmpdeep=lastnode.deep*2;
+                var tmpx,tmpy;
+                if(val>=lastnode.value){            //插入右边
+                    tmpx=lastnode.rbtnode.prop('position/x')+paperWidth/tmpdeep;
+                    tmpy=lastnode.rbtnode.prop('position/y')+Node.vertical_distance;
+                    tmpnode=Node.createNew(tmpx,tmpy,val);
+                    tmpnode.deep=tmpdeep;
+                    tmpnode.father=lastnode;
+                    lastnode.rchild=tmpnode;
+                }
+                else{                                   //插入左边
+                    tmpx=lastnode.rbtnode.prop('position/x')-paperWidth/tmpdeep;
+                    tmpy=lastnode.rbtnode.prop('position/y')+Node.vertical_distance;
+                    tmpnode=Node.createNew(tmpx,tmpy,val);
+                    tmpnode.deep=tmpdeep;
+                    tmpnode.father=lastnode;
+                    lastnode.lchild=tmpnode;
+                }
+                graph.addCells([tmpnode.rbtnode]);
+                addLink(graph,tmpnode,lastnode);
+            }
+        }
+        function addLink(graph,source_node,target_node){
+            var tmplink=new joint.dia.MyLink({
+                source:{id:source_node.rbtnode.id},
+                target:{id:target_node.rbtnode.id}
+            });
+            source_node.link_father=tmplink;
+            graph.addCell(tmplink);
+            return tmplink;
+        }
+        function findNode(val){
+            if(rbtree.head==null)return null;
+            var tmpnode=rbtree.head;
+            while(tmpnode!=null&&tmpnode.value!=val){
+                if(val>=tmpnode.value){
+                    tmpnode=tmpnode.rchild;
+                }
+                else tmpnode=tmpnode.lchild;
+            }
+            return tmpnode;
+        }
+        rbtree.changeToRed=function(val){
+            var tmpnode=findNode(val);
+            if(tmpnode==null)return ;
+            tmpnode.changeToRed();
+        }
+        rbtree.changeToBlack=function(val){
+            var tmpnode=findNode(val);
+            if(tmpnode==null)return ;
+            tmpnode.changeToBlack();
+        }
+        rbtree.cover=function(source_val,target_val) {
+            var source_node = findNode(source_val);
+            var target_node = findNode(target_val);
+            var source_father = source_node.father;
+            if (source_node.value >= source_father.value) {
+                source_father.rchild = null;
+            }
+            else {
+                source_father.lchild = null;
+            }
+            source_node.link_father.remove();
+            source_node.rbtnode.transition('position/x',target_node.rbtnode.prop('position').x, {
+                delay: 20,
+                duration: 1000,
+            });
+            source_node.rbtnode.transition('position/y',target_node.rbtnode.prop('position').y, {
+                delay: 20,
+                duration: 1000,
+            });
+            setTimeout(function(){
+                var tmplc=target_node.lchild;
+                var tmprc=target_node.rchild;
+                target_node.rbtnode.remove();
+                target_node.lchild=null;
+                target_node.rchild=null;
+                console.log(tmplc);
+                if(tmplc!=null)addLink(graph,tmplc,source_node)
+                if(tmprc!=null)addLink(graph,tmprc,source_node)
+            },1000)
+        }
+        rbtree.delnode=function(val){
+            var tmpnode=findNode(val);
+            if(tmpnode==null)return ;
+            tmpnode.link_father.remove();
+            tmpnode.rbtnode.transition('position/x',paperWidth,{
+                delay:20,
+                duration:1000
+            });
+            tmpnode.rbtnode.transition('position/y',paperHeight,{
+                delay:20,
+                duration:1000
+            });
+            setTimeout(function(){
+                tmpnode.rbtnode.remove();
+            },1000)
+        }
+        return rbtree;
+    }
+}
+
+
+
+
 
 
 
