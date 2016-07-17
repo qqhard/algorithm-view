@@ -32,6 +32,14 @@ RedBlackNode.prototype.rightLink = function(son) {
     son.father = this;
 }
 
+RedBlackNode.prototype.leftKey = function(son) {
+    return this.leftSon.key;
+}
+
+RedBlackNode.prototype.rightKey = function(son) {
+    return this.rightSon.key;
+}
+
 RedBlackTree.prototype.insert = function(key) {
     if(this.root==null){
         this.root = new RedBlackNode(key,true);
@@ -39,7 +47,20 @@ RedBlackTree.prototype.insert = function(key) {
         this.root.rightLink(new RedBlackNode(null,true));
     }
     var now = this.root;
+    while(now.key != null){
+        if(key < now.key){
+            now = now.leftSon;
+        }else if(key > now.key){
+            now = now.rightSon;
+        }else{
+            break;
+        }
+    }
+    //dup key ,insert fail
+    if(now.key!=null)return false;
+    now.key = key;
     
+
 
 }
 
