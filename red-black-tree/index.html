@@ -10,23 +10,38 @@
 </head>
 <body>
 <div style="display: inline-block; padding-right:10px;margin-right: 10px;border-right:dotted;border-right-color: #27ae60;border-right-width: 3px;">
-    <input id="tval" type="text" style="display: inline-block"/>
+    <input id="tval" type="text" style="display: inline-block;width:50px;"/>
     <button id="tbtn" style="display: inline-block;">添加</button>
 </div>
 <div style="display: inline-block; padding-right:10px;margin-right: 10px;border-right:dotted;border-right-color: #27ae60;border-right-width: 3px;">
-    <input id="tcol" type="text" style="display: inline-block"/>
+    <input id="tcol" type="text" style="display: inline-block;width:50px;"/>
     <button id="trbtn" style="display: inline-block;">变红</button>
     <button id="tbbtn" style="display: inline-block;">变黑</button>
 </div>
 <div style="display: inline-block; padding-right:10px;margin-right: 10px;border-right:dotted;border-right-color: #27ae60;border-right-width: 3px;">
-    <input id="tdel" type="text" style="display: inline-block"/>
+    <input id="tdel" type="text" style="display: inline-block;width:50px;"/>
     <button id="tdelbtn" style="display: inline-block;">删除</button>
 </div>
 <div style="display: inline-block; padding-right:10px;margin-right: 10px;border-right:dotted;border-right-color: #27ae60;border-right-width: 3px;">
-    <input id="tcovs" type="text" style="display: inline-block"/>
-    <input id="tcovt" type="text" style="display: inline-block"/>
+    <input id="tcovs" type="text" style="display: inline-block;width:50px;"/>
+    <input id="tcovt" type="text" style="display: inline-block;width:50px;"/>
     <button id="tcovbtn" style="display: inline-block;">覆盖</button>
 </div>
+
+<div style="display: inline-block; padding-right:10px;margin-right: 10px;border-right:dotted;border-right-color: #27ae60;border-right-width: 3px;">
+    <input id="texca" type="text" style="display: inline-block;width:50px;"/>
+    <select id="selexca">
+        <option value="0">左</option>
+        <option value="1">右</option>
+    </select>
+    <input id="texcb" type="text" style="display: inline-block;width:50px;"/>
+    <select id="selexcb">
+        <option value="0">左</option>
+        <option value="1">右</option>
+    </select>
+    <button id="texcbtn" style="display: inline-block;">交换</button>
+</div>
+
 <div id="myholder" style="width:1210px; height:610px; border:dashed; border-color: #2c3e50;border-width: 2px;border-radius: 5px;" class="label"></div>
 <script type="text/javascript">
     var pwidth=$("#myholder").width();
@@ -44,6 +59,7 @@
     var initarr=[16,8,4,2,6,12,10,14,24,20,18,22,28,26,30];
     for(var i in initarr){
         brt.addNode(initarr[i]);
+        //break;
     }
 
     document.getElementById('tbtn').onclick=function(){
@@ -67,6 +83,15 @@
         var tdel=parseInt(document.getElementById('tdel').value);
         brt.delnode(tdel);
     }
+    document.getElementById('texcbtn').onclick=function(){
+        var vala=parseInt(document.getElementById("texca").value);
+        var valb=parseInt(document.getElementById("texcb").value);
+        var chia=parseInt(document.getElementById("selexca").value);
+        var chib=parseInt(document.getElementById("selexcb").value);
+        brt.exChange(vala,chia,valb,chib);
+    }
+
+
 </script>
 </body>
 </html>

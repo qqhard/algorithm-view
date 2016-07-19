@@ -244,12 +244,16 @@ joint.dia.MyLink = joint.dia.Cell.extend({
         }
     });
 
+
+// this is what  I do
+
+
 var Node={
     red_color:'#CD0000',
     black_color:'#000000',
     vertical_distance:70,
     circle_radius:15,
-    createNew:function(x,y,value){
+    createNew:function(x,y,value,isNull){
         var rbtNode={};
         rbtNode.lchild=null;
         rbtNode.rchild=null;
@@ -257,11 +261,22 @@ var Node={
         rbtNode.link_father=null;
         rbtNode.deep=null;
         rbtNode.value=value;
-        rbtNode.rbtnode=new joint.shapes.basic.Circle({
-            position:{x:x,y:y},
-            size:{width:Node.circle_radius*2,height:Node.circle_radius*2},
-            attrs:{circle:{fill:Node.red_color},text:{text:""+value,fill:'#ffffff'}}
-        });
+        rbtNode.x=x;
+        rbtNode.y=y;
+        if(isNull==1){
+            rbtNode.rbtnode=new joint.shapes.basic.Rect({
+                position:{x:x,y:y},
+                size:{width:Node.circle_radius,height:Node.circle_radius},
+                attrs:{rect:{fill:'#222222'},text:{text:"",fill:'#ffffff'}}
+            });
+        }
+        else{
+            rbtNode.rbtnode=new joint.shapes.basic.Circle({
+                position:{x:x,y:y},
+                size:{width:Node.circle_radius*2,height:Node.circle_radius*2},
+                attrs:{circle:{fill:Node.red_color},text:{text:""+value,fill:'#ffffff'}}
+            });
+        }
         rbtNode.changeToRed=function(){
             rbtNode.rbtnode.attr({
                 circle:{fill:Node.red_color}
@@ -278,25 +293,42 @@ var Node={
 
 
 var RBT = {
+    delay:10,
+    duration:1000,
     createNew:function(graph,paperWidth,paperHeight){
         rbtree={};
         rbtree.graph=graph;
         rbtree.head=null;
         rbtree.width=parseInt(paperWidth);
         rbtree.height=parseInt(paperHeight);
+        addEmptyNode=function(target_node){
+            var tmpdeep=target_node.deep*2;
+            var tmplx=target_node.rbtnode.prop('position/x')-paperWidth/tmpdeep;
+            var tmprx=target_node.rbtnode.prop('position/x')+paperWidth/tmpdeep;
+            var tmpy=target_node.rbtnode.prop('position/y')+Node.vertical_distance;
+            var tmplchild=Node.createNew(tmplx,tmpy,NaN,1);
+            var tmprchild=Node.createNew(tmprx,tmpy,NaN,1);
+            tmplchild.deep=tmpdeep;
+            tmprchild.deep=tmpdeep;
+            target_node.lchild=tmplchild;
+            target_node.rchild=tmprchild;
+            rbtree.graph.addCells([tmplchild.rbtnode,tmprchild.rbtnode]);
+            addLink(tmplchild,target_node);
+            addLink(tmprchild,target_node);
+        }
         rbtree.addNode=function(val){
-            var tmpnode;
+            var tmpnode,tmpdeep;
             if(rbtree.head ==  null){       // 当前为空树
-                tmpnode=Node.createNew(rbtree.width/2-Node.circle_radius,30,val);
+                tmpnode=Node.createNew(rbtree.width/2-Node.circle_radius,30,val,0);
                 tmpnode.value=val;
                 tmpnode.deep=2;
                 rbtree.head=tmpnode;
                 graph.addCell(tmpnode.rbtnode);
             }
-            else{                         // 当前部位空树
+            else{                         // 当前不为空树
                 var tmpp=rbtree.head;
                 var lastnode=null;
-                while(tmpp!=null){
+                while(tmpp!=null&&!isNaN(tmpp.value)){
                     lastnode=tmpp;
                     if(val>=tmpp.value)tmpp=tmpp.rchild;
                     else tmpp=tmpp.lchild;
@@ -306,36 +338,39 @@ var RBT = {
                 if(val>=lastnode.value){            //插入右边
                     tmpx=lastnode.rbtnode.prop('position/x')+paperWidth/tmpdeep;
                     tmpy=lastnode.rbtnode.prop('position/y')+Node.vertical_distance;
-                    tmpnode=Node.createNew(tmpx,tmpy,val);
+                    tmpnode=Node.createNew(tmpx,tmpy,val,0);
                     tmpnode.deep=tmpdeep;
                     tmpnode.father=lastnode;
+                    lastnode.rchild.rbtnode.remove();
                     lastnode.rchild=tmpnode;
                 }
                 else{                                   //插入左边
                     tmpx=lastnode.rbtnode.prop('position/x')-paperWidth/tmpdeep;
                     tmpy=lastnode.rbtnode.prop('position/y')+Node.vertical_distance;
-                    tmpnode=Node.createNew(tmpx,tmpy,val);
+                    tmpnode=Node.createNew(tmpx,tmpy,val,0);
                     tmpnode.deep=tmpdeep;
                     tmpnode.father=lastnode;
+                    lastnode.lchild.rbtnode.remove();
                     lastnode.lchild=tmpnode;
                 }
                 graph.addCells([tmpnode.rbtnode]);
-                addLink(graph,tmpnode,lastnode);
+                addLink(tmpnode,lastnode);
             }
+            addEmptyNode(tmpnode);
         }
-        function addLink(graph,source_node,target_node){
+        function addLink(source_node,target_node){
             var tmplink=new joint.dia.MyLink({
                 source:{id:source_node.rbtnode.id},
                 target:{id:target_node.rbtnode.id}
             });
             source_node.link_father=tmplink;
-            graph.addCell(tmplink);
+            rbtree.graph.addCell(tmplink);
             return tmplink;
         }
         function findNode(val){
             if(rbtree.head==null)return null;
             var tmpnode=rbtree.head;
-            while(tmpnode!=null&&tmpnode.value!=val){
+            while(tmpnode!=null&&!isNaN(tmpnode.value)&&tmpnode.value!=val){
                 if(val>=tmpnode.value){
                     tmpnode=tmpnode.rchild;
                 }
@@ -345,59 +380,157 @@ var RBT = {
         }
         rbtree.changeToRed=function(val){
             var tmpnode=findNode(val);
-            if(tmpnode==null)return ;
+            if(tmpnode==null||isNaN(tmpnode.value))return ;
             tmpnode.changeToRed();
         }
         rbtree.changeToBlack=function(val){
             var tmpnode=findNode(val);
-            if(tmpnode==null)return ;
+            if(tmpnode==null||isNaN(tmpnode.value))return ;
             tmpnode.changeToBlack();
         }
+
+        function changePosition(tnode,px,py){
+            var delay=RBT.delay;
+            var duration=RBT.duration;
+            tnode.x=px;tnode.y=py;
+            tnode.rbtnode.transition('position/x',px,{
+                delay: delay,
+                duration: duration,
+            });
+            tnode.rbtnode.transition('position/y',py,{
+                delay: delay,
+                duration: duration,
+            });
+        }
+
         rbtree.cover=function(source_val,target_val) {
             var source_node = findNode(source_val);
             var target_node = findNode(target_val);
+            if(source_node==null||isNaN(source_node.value)||target_node==null||isNaN(target_node.value))return ;
             var source_father = source_node.father;
+            source_node.rchild.rbtnode.remove();
+            source_node.lchild.link_father.remove();
             if (source_node.value >= source_father.value) {
-                source_father.rchild = null;
+                source_father.rchild = source_node.lchild;
             }
             else {
-                source_father.lchild = null;
+                source_father.lchild = source_node.lchild;
             }
             source_node.link_father.remove();
-            source_node.rbtnode.transition('position/x',target_node.rbtnode.prop('position').x, {
-                delay: 20,
-                duration: 1000,
-            });
-            source_node.rbtnode.transition('position/y',target_node.rbtnode.prop('position').y, {
-                delay: 20,
-                duration: 1000,
-            });
+            addLink(source_node.lchild,source_node.father);
+            var tmpos=source_node.rbtnode.prop('position');
+            changePosition(source_node.lchild,tmpos.x,tmpos.y);
+            changePosition(source_node,target_node.rbtnode.prop('position').x,target_node.rbtnode.prop('position').y);
             setTimeout(function(){
                 var tmplc=target_node.lchild;
                 var tmprc=target_node.rchild;
-                target_node.rbtnode.remove();
+                if(target_node==rbtree.head){rbtree.head=source_node;}
+                else{
+                    if(target_node.value>=target_node.father.value){
+                        target_node.father.rchild=source_node;
+                    }
+                    else{
+                        target_node.father.lchild=source_node;
+                    }
+                    addLink(source_node,target_node.father);
+                    source_node.father=target_node.father;
+                }
+                source_node.lchild=target_node.lchild;
+                source_node.rchild=target_node.rchild;
+                source_node.deep=target_node.deep;
                 target_node.lchild=null;
                 target_node.rchild=null;
-                console.log(tmplc);
-                if(tmplc!=null)addLink(graph,tmplc,source_node)
-                if(tmprc!=null)addLink(graph,tmprc,source_node)
-            },1000)
+                target_node.rbtnode.remove();
+                if(tmplc!=null)addLink(tmplc,source_node)
+                if(tmprc!=null)addLink(tmprc,source_node)
+                tmplc.father=source_node;
+                tmprc.father=source_node;
+            },1100)
         }
         rbtree.delnode=function(val){
             var tmpnode=findNode(val);
-            if(tmpnode==null)return ;
-            tmpnode.link_father.remove();
-            tmpnode.rbtnode.transition('position/x',paperWidth,{
-                delay:20,
-                duration:1000
-            });
-            tmpnode.rbtnode.transition('position/y',paperHeight,{
-                delay:20,
-                duration:1000
-            });
+            if(tmpnode==null||isNaN(tmpnode.value))return ;
+            var tmpos=tmpnode.rbtnode.prop('position');
+            tmpnode.rchild.rbtnode.remove();
+            if(tmpnode.father==null){
+                tmpnode.lchild.rbtnode.remove();
+            }
+            else{
+                if(tmpnode.value>=tmpnode.father.value){
+                    tmpnode.father.rchild=tmpnode.lchild;
+                }
+                else{
+                    tmpnode.father.lchild=tmpnode.lchild;
+                }
+                tmpnode.lchild.link_father.remove();
+                addLink(tmpnode.lchild,tmpnode.father);
+                tmpnode.link_father.remove();
+                changePosition(tmpnode.lchild,tmpos.x,tmpos.y);
+            }
+            changePosition(tmpnode,paperWidth,paperHeight);
             setTimeout(function(){
                 tmpnode.rbtnode.remove();
-            },1000)
+            },1000);
+            tmpnode.lchild.father=tmpnode.father;
+            tmpnode.lchild=null;
+            tmpnode.rchild=null;
+            tmpnode.father=null;
+        }
+
+        function recursionForExChangeNode(father_node,child_node,lOrR){
+            if(child_node==null)return ;
+            var tmpx,tmpy,tmpfx,tmpdeep;
+            tmpy=father_node.y+Node.vertical_distance;
+            tmpfx=father_node.x;
+            tmpdeep=father_node.deep*2;
+            if(lOrR == 0) tmpx = tmpfx-rbtree.width/tmpdeep;
+            else tmpx=tmpfx+rbtree.width/tmpdeep;
+            child_node.deep=tmpdeep;
+            child_node.x=tmpx;
+            child_node.y=tmpy;
+           changePosition(child_node,tmpx,tmpy);
+            recursionForExChangeNode(child_node,child_node.lchild,0);
+            recursionForExChangeNode(child_node,child_node.rchild,1);
+        }
+
+        rbtree.exChange=function(vala,ca,valb,cb){
+            var tmpnodea=findNode(vala);
+            var tmpnodeb=findNode(valb);
+            var nodea,nodeb;
+            if(tmpnodea==null||isNaN(tmpnodea.value))return ;
+            if(tmpnodeb==null||isNaN(tmpnodeb.value))return ;
+            if(ca==0)nodea=tmpnodea.lchild;
+            else nodea=tmpnodea.rchild;
+            if(cb==0)nodeb=tmpnodeb.lchild;
+            else nodeb=tmpnodeb.rchild;
+            if(nodea==null||nodeb==null)return;
+            var tfa=nodea.father;
+            var tfb=nodeb.father;
+            var which_child_a,which_child_b;
+            if(nodea.father.lchild==nodea)which_child_a=0;
+            else which_child_a=1;
+            if(nodeb.father.lchild==nodeb)which_child_b=0;
+            else which_child_b=1;
+            nodea.link_father.remove();
+            nodeb.link_father.remove();
+            if(which_child_a==0){
+                tfa.lchild=nodeb;
+            }
+            else{
+                tfa.rchild=nodeb;
+            }
+            if(which_child_b==0){
+                tfb.lchild=nodea;
+            }
+            else{
+                tfb.rchild=nodea;
+            }
+            nodeb.father=tfa;
+            nodea.father=tfb;
+            addLink(nodea,tfb);
+            addLink(nodeb,tfa);
+            recursionForExChangeNode(tmpnodeb,nodea,cb);
+            recursionForExChangeNode(tmpnodea,nodeb,ca);
         }
         return rbtree;
     }
