@@ -364,6 +364,7 @@ var RBT = {
                 target:{id:target_node.rbtnode.id}
             });
             source_node.link_father=tmplink;
+            //console.log("link:   "+source_node.value+" = "+target_node.value);
             rbtree.graph.addCell(tmplink);
             return tmplink;
         }
@@ -532,6 +533,73 @@ var RBT = {
             recursionForExChangeNode(tmpnodeb,nodea,cb);
             recursionForExChangeNode(tmpnodea,nodeb,ca);
         }
+
+
+        rbtree.leftRotate=function(val){
+            var tmpnode=findNode(val);
+            var tmpfnode=tmpnode.father;
+            var tmpfpos=tmpfnode.rbtnode.prop('position');
+            tmpnode.link_father.remove();
+            tmpnode.rchild.link_father.remove();
+            if(tmpfnode.father==null){
+                rbtree.head=tmpnode;
+            }else{
+                var tmpgfnode=tmpfnode.father;
+                tmpfnode.link_father.remove();
+                if(tmpfnode.father.lchild==tmpfnode){
+                    tmpgfnode.lchild=tmpnode;
+                }
+                else{
+                        tmpgfnode.rchild=tmpnode;
+                }
+                tmpnode.father=tmpgfnode;
+                addLink(tmpnode,tmpgfnode);
+            }
+            tmpfnode.lchild=tmpnode.rchild;
+            tmpnode.rchild=tmpfnode;
+            addLink(tmpnode.rchild,tmpnode);
+            addLink(tmpfnode.lchild,tmpfnode);
+            tmpnode.rchild.father=tmpnode;
+            tmpfnode.lchild.father=tmpfnode;
+            tmpnode.deep=tmpfnode.deep;
+            changePosition(tmpnode,tmpfpos.x,tmpfpos.y);
+            recursionForExChangeNode(tmpnode,tmpnode.lchild,0);
+            recursionForExChangeNode(tmpnode,tmpnode.rchild,1);
+        }
+
+        rbtree.rightRotate=function(val){
+            var tmpnode=findNode(val);
+            var tmpfnode=tmpnode.father;
+            var tmpfpos=tmpfnode.rbtnode.prop('position');
+            tmpnode.link_father.remove();
+            tmpnode.lchild.link_father.remove();
+            if(tmpnode.father==null){
+                rbtree.head=tmpnode;
+            }else{
+                var tmpgfnode=tmpfnode.father;
+                tmpfnode.link_father.remove();
+                if(tmpfnode.father.lchild==tmpfnode){
+                    tmpgfnode.lchild=tmpnode;
+                }
+                else{
+                    tmpgfnode.rchild=tmpnode;
+                }
+                tmpnode.father=tmpgfnode;
+                addLink(tmpnode,tmpgfnode);
+            }
+            tmpfnode.rchild=tmpnode.lchild;
+            tmpnode.lchild=tmpfnode;
+            addLink(tmpnode.lchild,tmpnode);
+            addLink(tmpfnode.rchild,tmpfnode);
+            tmpnode.lchild.father=tmpnode;
+            tmpfnode.rchild.father=tmpfnode;
+            tmpnode.deep=tmpfnode.deep;
+            changePosition(tmpnode,tmpfpos.x,tmpfpos.y);
+            recursionForExChangeNode(tmpnode,tmpnode.lchild,0);
+            recursionForExChangeNode(tmpnode,tmpnode.rchild,1);
+        }
+
+
         return rbtree;
     }
 }

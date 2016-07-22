@@ -42,6 +42,16 @@
     <button id="texcbtn" style="display: inline-block;">交换</button>
 </div>
 
+
+<div style="display: inline-block; padding-right:10px;margin-right: 10px;border-right:dotted;border-right-color: #27ae60;border-right-width: 3px;">
+    <input id="tlrt" type="text" style="display: inline-block;width:50px;"/>
+    <button id="tlrbtn" style="display: inline-block;">左旋</button>
+</div>
+<div style="display: inline-block; padding-right:10px;margin-right: 10px;border-right:dotted;border-right-color: #27ae60;border-right-width: 3px;">
+    <input id="trrt" type="text" style="display: inline-block;width:50px;"/>
+    <button id="trrbtn" style="display: inline-block;">右旋</button>
+</div>
+
 <div id="myholder" style="width:1210px; height:610px; border:dashed; border-color: #2c3e50;border-width: 2px;border-radius: 5px;" class="label"></div>
 <script type="text/javascript">
     var pwidth=$("#myholder").width();
@@ -89,6 +99,16 @@
         var chia=parseInt(document.getElementById("selexca").value);
         var chib=parseInt(document.getElementById("selexcb").value);
         brt.exChange(vala,chia,valb,chib);
+    }
+
+    document.getElementById('tlrbtn').onclick=function(){
+        var val=parseInt(document.getElementById('tlrt').value);
+        brt.leftRotate(val);
+    }
+
+    document.getElementById('trrbtn').onclick=function(){
+        var val=parseInt(document.getElementById('trrt').value);
+        brt.rightRotate(val);
     }
 
 
