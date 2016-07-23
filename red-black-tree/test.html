@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="/bower_components/jointjs/dist/joint.css" />
+
+</head>
+<body>
+<div style="display: inline-block; padding-right:10px;margin-right: 10px;border-right:dotted;border-right-color: #27ae60;border-right-width: 3px;">
+    <input id="tval" type="text" style="display: inline-block;width:50px;"/>
+    <button id="tbtn" style="display: inline-block;">添加</button>
+</div>
+
+<div style="display: inline-block; padding-right:10px;margin-right: 10px;border-right:dotted;border-right-color: #27ae60;border-right-width: 3px;">
+    <input id="tdel" type="text" style="display: inline-block;width:50px;"/>
+    <button id="tdelbtn" style="display: inline-block;">删除</button>
+</div>
+
+<div id="myholder" style="width:1210px; height:610px; border:dashed; border-color: #2c3e50;border-width: 2px;border-radius: 5px;" class="label"></div>
+<script src="/bower_components/jquery/jquery.js"></script>
+<script src="/bower_components/lodash/lodash.js"></script>
+<script src="/bower_components/backbone/backbone.js"></script>
+<script src="/bower_components/jointjs/dist/joint.js"></script>
+<script src="/red-black-tree/rbtoperation.js"></script>
+<script src="/red-black-tree/red-black-tree-view.js"></script>
+<script type="text/javascript">
+    $(function(){
+        var rbt = new RedBlackTree();
+
+        document.getElementById('tbtn').onclick=function(){
+            var tval=parseInt(document.getElementById('tval').value);
+            rbt.insert(tval);
+        }
+
+        document.getElementById('tdelbtn').onclick=function(){
+            var tdel=parseInt(document.getElementById('tdel').value);
+            rbt.delnode(tdel);
+        }
+    });
+
+
+
+</script>
+</body>
+</html>

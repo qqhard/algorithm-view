@@ -568,15 +568,18 @@ var RBT = {
         }
 
         rbtree.rightRotate=function(val){
-            var tmpnode=findNode(val);
+
+            var tmpnode=findNode(val); console.log(tmpnode);
             var tmpfnode=tmpnode.father;
             var tmpfpos=tmpfnode.rbtnode.prop('position');
             tmpnode.link_father.remove();
             tmpnode.lchild.link_father.remove();
-            if(tmpnode.father==null){
+            if(tmpfnode.father==null){
                 rbtree.head=tmpnode;
             }else{
                 var tmpgfnode=tmpfnode.father;
+                console.log(tmpfnode);
+                console.log(tmpfnode.link_father);
                 tmpfnode.link_father.remove();
                 if(tmpfnode.father.lchild==tmpfnode){
                     tmpgfnode.lchild=tmpnode;
