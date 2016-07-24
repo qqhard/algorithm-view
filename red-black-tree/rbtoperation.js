@@ -599,6 +599,9 @@ var RBT = {
             recursionForExChangeNode(tmpnode,tmpnode.rchild,1);
         }
 
+        rbtree.insertNode=function(){
+            
+        }
 
         return rbtree;
     }
