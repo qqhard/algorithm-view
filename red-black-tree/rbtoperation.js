@@ -452,30 +452,68 @@ var RBT = {
             var tmpnode=findNode(val);
             if(tmpnode==null||isNaN(tmpnode.value))return ;
             var tmpos=tmpnode.rbtnode.prop('position');
-            tmpnode.rchild.rbtnode.remove();
-            if(tmpnode.father==null){
-                tmpnode.lchild.rbtnode.remove();
+            if(isNaN(tmpnode.lchild.value)&&isNaN(tmpnode.rchild.value)) {
+                tmpnode.rchild.rbtnode.remove();
+                if (tmpnode.father == null) {
+                    tmpnode.lchild.rbtnode.remove();
+                }
+                else {
+                    if (tmpnode.value >= tmpnode.father.value) {
+                        tmpnode.father.rchild = tmpnode.lchild;
+                    }
+                    else {
+                        tmpnode.father.lchild = tmpnode.lchild;
+                    }
+                    tmpnode.lchild.link_father.remove();
+                    addLink(tmpnode.lchild, tmpnode.father);
+                    tmpnode.link_father.remove();
+                    changePosition(tmpnode.lchild, tmpos.x, tmpos.y);
+                }
+                changePosition(tmpnode, paperWidth, paperHeight);
+                setTimeout(function () {
+                    tmpnode.rbtnode.remove();
+                }, 1000);
+                tmpnode.lchild.father = tmpnode.father;
+                tmpnode.lchild = null;
+                tmpnode.rchild = null;
+                tmpnode.father = null;
             }
-            else{
-                if(tmpnode.value>=tmpnode.father.value){
-                    tmpnode.father.rchild=tmpnode.lchild;
+            else if(isNaN(tmpnode.lchild.value)||isNaN(tmpnode.rchild.value)){
+                var tmpnodechild=null;
+                if(!isNaN(tmpnode.lchild.value)){
+                    tmpnode.lchild.rchild.rbtnode.remove();
+                    tmpnode.rchild.link_father.remove();
+                    tmpnode.rchild.father=tmpnode.lchild;
+                    tmpnode.lchild.rchild=tmpnode.rchild;
+                    addLink(tmpnode.lchild.rchild,tmpnode.lchild);
+                    tmpnodechild=tmpnode.lchild;
                 }
                 else{
-                    tmpnode.father.lchild=tmpnode.lchild;
+                    tmpnode.rchild.lchild.rbtnode.remove();
+                    tmpnode.lchild.link_father.remove();
+                    tmpnode.lchild.father=tmpnode.rchild;
+                    tmpnode.rchild.lchild=tmpnode.lchild;
+                    addLink(tmpnode.rchild.lchild,tmpnode.rchild);
+                    tmpnodechild=tmpnode.rchild;
                 }
-                tmpnode.lchild.link_father.remove();
-                addLink(tmpnode.lchild,tmpnode.father);
-                tmpnode.link_father.remove();
-                changePosition(tmpnode.lchild,tmpos.x,tmpos.y);
-            }
-            changePosition(tmpnode,paperWidth,paperHeight);
-            setTimeout(function(){
                 tmpnode.rbtnode.remove();
-            },1000);
-            tmpnode.lchild.father=tmpnode.father;
-            tmpnode.lchild=null;
-            tmpnode.rchild=null;
-            tmpnode.father=null;
+                if(tmpnode.father==null){
+                    rbtnode.head=tmpnodechild;
+                    tmpnodechild.father=null;
+                }
+                else{
+                    if(tmpnode==tmpnode.father.lchild){
+                        tmpnode.father.lchild=tmpnodechild;
+                    }
+                    else tmpnode.father.rchild=tmpnodechild;
+                    tmpnodechild.father=tmpnode.father;
+                    tmpnodechild.deep=tmpnode.deep;
+                    addLink(tmpnodechild,tmpnodechild.father);
+                    changePosition(tmpnodechild,tmpos.x,tmpos.y);
+                    recursionForExChangeNode(tmpnodechild,tmpnodechild.lchild,0);
+                    recursionForExChangeNode(tmpnodechild,tmpnodechild.rchild,1);
+                }
+            }
         }
 
         function recursionForExChangeNode(father_node,child_node,lOrR){
@@ -543,6 +581,7 @@ var RBT = {
             tmpnode.rchild.link_father.remove();
             if(tmpfnode.father==null){
                 rbtree.head=tmpnode;
+                tmpnode.father=null;
             }else{
                 var tmpgfnode=tmpfnode.father;
                 tmpfnode.link_father.remove();
@@ -568,7 +607,6 @@ var RBT = {
         }
 
         rbtree.rightRotate=function(val){
-
             var tmpnode=findNode(val); console.log(tmpnode);
             var tmpfnode=tmpnode.father;
             var tmpfpos=tmpfnode.rbtnode.prop('position');
@@ -576,6 +614,7 @@ var RBT = {
             tmpnode.lchild.link_father.remove();
             if(tmpfnode.father==null){
                 rbtree.head=tmpnode;
+                tmpnode.father=null;
             }else{
                 var tmpgfnode=tmpfnode.father;
                 console.log(tmpfnode);
