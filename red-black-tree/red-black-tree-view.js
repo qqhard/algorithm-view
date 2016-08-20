@@ -374,6 +374,11 @@ RedBlackTree.prototype.delete = function (key) {
         }else{
             father.rightLink(child);
         }
+        if(old.color == this.RED)rbtView.changeToRed(node.key);
+        else rbtView.changeToBlack(node.key);
+        // rbtView.cover(node.key,old.key);
+        rbtView.delnode(node.key);
+        rbtView.ch
         old.key = node.key;
     }else{
         if(node.leftKey() != null){
@@ -393,12 +398,15 @@ RedBlackTree.prototype.delete = function (key) {
                 father.rightLink(child);
             }
         }
+        console.log(node.key);
+        rbtView.delnode(node.key);
     }
     if(node.color == this.BLACK){
-        this.delAjust(node);
+        setTimeout(function () {
+            this.delAjust(node);
+        }.bind(this),2000);
     }
     return true;
-
 }
 
 // var main = function () {
